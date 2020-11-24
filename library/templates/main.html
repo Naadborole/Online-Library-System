@@ -1,0 +1,102 @@
+{% extends 'mainTemplate.html' %}
+{% load static %}
+
+{% block mainblock %}
+    <div class="section">
+        <div class="testimonials-3">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-lg-3 col-md-8 col-10 positioned">
+              <h3 class="display-3">Your List</h3>
+              <p class="lead">
+                Add books to your list for easy access. Browse books in catalogue and save them to your list. You can edit the list any time you want.
+              </p>
+              <a href="javascript:;" class="btn btn-primary mt-5">Add books</a>
+            </div>
+            <div class="col-md-12 col-md-6">
+              <div class="testimonial-glide glide--ltr glide--carousel glide--swipeable" id = "thisglide">
+                <div class="glide__track" data-glide-el="track">
+                  <ul class="glide__slides" id = "mylist" style="transition: transform 400ms cubic-bezier(0.165, 0.84, 0.44, 1) 0s; width: 4661.25px; transform: translate3d(-1553.75px, 0px, 0px);">
+
+                  </ul>
+                </div>
+                <div class="glide__arrows" data-glide-el="controls">
+                  <button class="glide__arrow glide__arrow--left text-default" data-glide-dir="<"><i class="ni ni-bold-left"></i></button>
+                  <button class="glide__arrow glide__arrow--right text-default" data-glide-dir=">"><i class="ni ni-bold-right"></i></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class = "section">
+
+    </div>
+{% endblock %}
+{% block scriptblock %}
+    <script>
+    let objid = "{{ id|safe }}";
+    let url = location.origin + "/getlist/"+ objid;
+    let url2 = location.origin + "/getCatalogue/";
+    let data;
+    fetch(url)
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(myJson) {
+        data = myJson;
+        loadList();
+        console.log("initialize");
+        new Glide('#thisglide', {
+                type: 'carousel',
+                startAt: 0,
+                focusAt: 2,
+                perTouch: 1,
+                perView: 4,
+            }).mount();
+    });
+
+    fetch(url2)
+    .then(function(response){
+        return response.json
+    })
+    .then(function(data){
+        
+    })
+
+
+    let loadList = function(){
+        for(let i=0; i<data.length; i++) {
+            let liitem = document.createElement('li');
+            let im = document.createElement('img');
+            im.src = data[i]['cover']['medium'];
+            im.classList.add("img-fluid", "rounded", "shadow")
+            im.style.width = "65px";
+            im.style.height = "100px";
+            im.style.marginRight = "10px";
+            let sp = document.createElement('span')
+            sp.classList.add("h3");
+            let sptxt = document.createTextNode(data[i]['title']);
+            liitem.classList.add("glide__slide");
+            liitem.style.width = "300.75px";
+            liitem.style.marginLeft = "5px";
+            liitem.style.marginRight = "5px";
+            let indiv = document.createElement('div');
+            indiv.classList.add("info", "text-left");
+            let inp = document.createElement("p");
+            let text = document.createTextNode(data[i]['description'])
+            inp.appendChild(text);
+            sp.appendChild(sptxt);
+            indiv.appendChild(im);
+            indiv.appendChild(sp);
+            indiv.appendChild(inp);
+            liitem.appendChild(indiv);
+            let ul = document.getElementById("mylist");
+            ul.appendChild(liitem);
+        }
+
+    }
+
+    </script>
+{% endblock %}
