@@ -1,0 +1,47 @@
+{% extends 'onlynavtemplate.html' %}
+{% load static %}
+
+{% block main %}
+    <div class = 'section'>
+        <div class = 'row justify-content-center'>
+            <div class="col-md-10 card py-5">
+                <div class = "row">
+                    <div class = "col-md-4">
+                        <img src = "{{ imglink|safe }}" class ="img-center">
+                    </div>
+                    <div class="col-md-8 py-3 pl-4">
+                        <h1 class="pb-5">{{ title }} </h1>
+                        <p class="pr-7">{{ description }}</p>
+                        <div class = "btn-wrapper mt-5">
+                            <p class="btn btn-gradient-default mr-6 " id="addtolist" onclick="addBook()">Add to list</p>
+                            <p class="btn btn-gradient-default mr-6">Buy/Read</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scriptb %}
+    <script>
+        let dis = {{ dis|safe }};
+        if(dis){
+            let el = document.getElementById("addtolist");
+            el.classList.add("disabled");
+            el.setAttribute('disabled', 'disabled');
+        }
+        let addBook = function() {
+            let addbookurl = location.origin + "/addbook/{{ bookid|safe }}/{{ email|safe }}";
+            if(!dis) {
+                fetch(addbookurl)
+                    .then(function (response) {
+                        return response.json()
+                    })
+                    .then(function (data) {
+                        alert(data['status'])
+                    })
+            }
+        }
+    </script>
+{% endblock %}

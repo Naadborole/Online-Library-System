@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from .forms import *
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+import json
 
 loggedIn = False
 client = MongoClient(
@@ -122,3 +123,40 @@ class searchTitle(View):
         return JsonResponse(userdata, safe=False)
 
 
+class getBook(View):
+    def get(self, request, id, email):
+        books = db['books']
+        bookdata = books.find_one({"_id": id})
+        if bookdata is None:
+            return HttpResponse("404 Page not found")
+        datapass = dict()
+        datapass['bookid'] = id
+        datapass['imglink'] = bookdata['cover']['medium']
+        datapass['title'] = bookdata['title']
+        datapass['description'] = bookdata['description']
+        datapass['email'] = email
+        lists = db['lists']
+        listobj = lists.find_one({"email": email})
+        arr = listobj['books']
+        if id in arr:
+            datapass['dis'] = "true"
+        else:
+            datapass['dis'] = "false"
+        return render(request, 'bookview.html', datapass)
+
+
+class addTolist(View):
+    def get(self, request, email, id):
+        books = db['books']
+        lists = db['lists']
+        bookdata = books.find_one({"_id": id})
+        listdata = lists.find_one({"email": email})
+        if bookdata is None or listdata is None:
+            return JsonResponse({"Status": "Book was not added"})
+        else:
+            if id not in listdata['books']:
+                templist = listdata['books']
+                templist.append(id)
+                lists.update_one({"email": email}, {"$set": {"books": templist}})
+                return JsonResponse({"status": "Book was added"})
+        return JsonResponse({"status": "Book already present"})

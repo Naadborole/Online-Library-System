@@ -10,4 +10,6 @@ urlpatterns = [
     path('getuser/<str:id>/', views.getuser.as_view(), name='getuser'),
     path('getCatalogue/', views.getCatalogue.as_view(), name='catalogue'),
     path('search/<str:title>/', views.searchTitle.as_view(), name='search'),
+    path('getbook/<str:id>/<str:email>', views.getBook.as_view(), name='getbook'),
+    path('addbook/<str:id>/<str:email>', views.addTolist.as_view(), name='addbook'),
 ]
