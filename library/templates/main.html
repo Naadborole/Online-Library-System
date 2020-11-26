@@ -40,6 +40,7 @@
     let url = location.origin + "/getlist/"+ objid;
     let url2 = location.origin + "/getCatalogue/";
     let data;
+    let glider;
     fetch(url)
     .then(function(response) {
         return response.json();
@@ -47,14 +48,15 @@
     .then(function(myJson) {
         data = myJson;
         loadList2();
-        console.log("initialize");
-        new Glide('#thisglide', {
+        if(data.length > 0) {
+            glider = new Glide('#thisglide', {
                 type: 'carousel',
                 startAt: 0,
                 focusAt: 2,
                 perTouch: 1,
                 perView: 4,
             }).mount();
+        }
     });
 
     {#fetch(url2)#}
@@ -65,96 +67,128 @@
     {#    #}
     {# })#}
 
+    let updateList = function(){
+        let objid = "{{ id|safe }}";
+        let url = location.origin + "/getlist/"+ objid;
+        fetch(url)
+    .   then(function(response) {
+            return response.json();
+        })
+        .then(function(myJson) {
+            data = myJson;
+            glider.destroy();
+            removeChild();
+            loadList2();
+            if(data.length > 0) {
+                glider = new Glide('#thisglide', {
+                    type: 'carousel',
+                    startAt: 0,
+                    focusAt: 2,
+                    perTouch: 1,
+                    perView: 4,
+                }).mount();
+            }
+        });
+    }
 
-    let loadList = function() {
-        for (let i = 0; i < data.length; i++) {
-            let maindiv = document.createElement('div');
-            maindiv.classList.add('row');
+
+    let loadList2 = function(){
+        for(let i=0; i<data.length; i++) {
+            {#li #}
             let liitem = document.createElement('li');
-            let im = document.createElement('img');
-            im.src = data[i]['cover']['medium'];
-            im.classList.add("img-fluid", "rounded", "shadow")
-            im.style.width = "65px";
-            im.style.height = "100px";
-            im.style.marginRight = "10px";
-            let sp = document.createElement('span')
-            sp.classList.add("h3", "text-wrap");
-            sp.style.display = 'block';
-            let sptxt = document.createTextNode(data[i]['title']);
             liitem.classList.add("glide__slide");
             liitem.style.width = "350.75px";
             liitem.style.marginLeft = "5px";
             liitem.style.marginRight = "5px";
-            let indiv = document.createElement('div');
-            indiv.classList.add("info", "text-left");
+            {#card div#}
+            let carddiv = document.createElement('div');
+            carddiv.classList.add("card", "px-3", "py-2")
+            {# div row #}
+            let divr1 = document.createElement('div')
+            divr1.classList.add('row', "mt--2")
+            {# col-md-6#}
+            let col1 = document.createElement('div')
+            col1.classList.add('col-md-4')
+            {#img#}
+            let im = document.createElement('img');
+            im.src = data[i]['cover']['medium'];
+            im.classList.add("img-fluid", "rounded", "shadow")
+
+            col1.appendChild(im);
+            divr1.appendChild(col1);
+
+            {#col-md-6#}
+            let col2 = document.createElement('div')
+            col2.classList.add('col-md-8', 'pt-5', 'text-center')
+            {#title#}
+            let sp = document.createElement('span')
+            sp.classList.add("h3", "text-wrap");
+            sp.style.display = 'block';
+            let sptxt = document.createTextNode(data[i]['title']);
+            sp.appendChild(sptxt);
+            col2.appendChild(sp);
+            divr1.appendChild(col2);
+            {#div row#}
+            let divr2 = document.createElement('div')
+            divr2.classList.add('mt--3')
             let inp = document.createElement("p");
+            inp.style.height = "300px";
+            inp.style.overflow ="hidden";
+            inp.style.textOverflow = "ellipsis";
             let text = document.createTextNode(data[i]['description'])
             inp.appendChild(text);
-            sp.appendChild(sptxt);
-            indiv.appendChild(im);
-            indiv.appendChild(sp);
-            indiv.appendChild(inp);
-            indiv.appendChild(maindiv);
-            liitem.appendChild(indiv);
+            divr2.appendChild(inp);
+
+            {#btn-wrapper#}
+            let divbtn = document.createElement('div');
+            divbtn.classList.add('btn-wrapper', 'mt--2');
+            divbtn.setAttribute('bookid', data[i]['_id']);
+            let pr = document.createElement('div');
+            pr.classList.add("btn", "bg-gradient-danger", "text-white", "mr-5");
+            let prtext = document.createTextNode("Remove");
+            let pr2 = document.createElement('div');
+            pr2.classList.add("btn", "bg-gradient-info", "text-white");
+            let prtext2 = document.createTextNode("View");
+            pr2.appendChild(prtext2);
+            pr.appendChild(prtext);
+            pr2.style.width = "102px";
+            pr.onclick = function(){removeBook(data[i]["_id"])};
+            pr2.onclick = function(){viewButton(data[i]["_id"])};
+            divbtn.appendChild(pr);
+            divbtn.appendChild(pr2);
+
+            carddiv.appendChild(divr1);
+            carddiv.appendChild(divr2);
+            carddiv.appendChild(divbtn);
+            liitem.appendChild(carddiv);
             let ul = document.getElementById("mylist");
             ul.appendChild(liitem);
         }
     }
-        let loadList2 = function(){
-            for(let i=0; i<data.length; i++) {
-                {#li #}
-                let liitem = document.createElement('li');
-                liitem.classList.add("glide__slide");
-                liitem.style.width = "350.75px";
-                liitem.style.marginLeft = "5px";
-                liitem.style.marginRight = "5px";
-                {#card div#}
-                let carddiv = document.createElement('div');
-                carddiv.classList.add("card", "px-3", "py-2")
-                {# div row #}
-                let divr1 = document.createElement('div')
-                divr1.classList.add('row', "mt--2")
-                {# col-md-6#}
-                let col1 = document.createElement('div')
-                col1.classList.add('col-md-4')
-                {#img#}
-                let im = document.createElement('img');
-                im.src = data[i]['cover']['medium'];
-                im.classList.add("img-fluid", "rounded", "shadow")
 
-                col1.appendChild(im);
-                divr1.appendChild(col1);
+    let viewButton = function(id){
+        let url = location.origin + "/getbook/" + id + "/{{ email|safe }}";
+        window.location = url;
+    }
 
-                {#col-md-6#}
-                let col2 = document.createElement('div')
-                col2.classList.add('col-md-8', 'pt-5', 'text-center')
-                {#title#}
-                let sp = document.createElement('span')
-                sp.classList.add("h3", "text-wrap");
-                sp.style.display = 'block';
-                let sptxt = document.createTextNode(data[i]['title']);
-                sp.appendChild(sptxt);
-                col2.appendChild(sp);
-                divr1.appendChild(col2);
-                {#div row#}
-                let divr2 = document.createElement('div')
-                divr2.classList.add('mt--3')
-                let inp = document.createElement("p");
-                inp.style.height = "300px";
-                inp.style.overflow ="hidden";
-                inp.style.textOverflow = "ellipsis";
-                let text = document.createTextNode(data[i]['description'])
-                inp.appendChild(text);
-                divr2.appendChild(inp);
+    let removeBook = function(id) {
+        let url = location.origin + "/removebook/" + id + "/{{ email|safe }}";
+        fetch(url)
+        .then(function(response){
+            return response.json();
+        })
+        .then(function(data){
+            console.log(data);
+            updateList();
+        })
+    }
 
-                carddiv.appendChild(divr1);
-                carddiv.appendChild(divr2);
-                liitem.appendChild(carddiv);
-                let ul = document.getElementById("mylist");
-                ul.appendChild(liitem);
-            }
-
+    let removeChild = function(){
+        let elem = document.getElementById("mylist")
+        while(elem.firstChild){
+            elem.removeChild(elem.firstChild);
         }
+    }
 
     </script>
 {% endblock %}

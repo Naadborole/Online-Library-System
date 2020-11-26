@@ -16,8 +16,11 @@ db = client.data
 
 # Create your views here.
 class mainPage(View):
-    def get(self, request, email):
-        return render(request, 'main.html', {'id': email})
+    def get(self, request, id):
+        users = db['Users']
+        userdata = users.find_one({"_id": ObjectId(id)})
+        email = userdata['email']
+        return render(request, 'main.html', {'id': id, 'email': email})
 
 
 class IndexView(View):
@@ -61,6 +64,7 @@ class SignUp(View):
 
     def post(self, request):
         users = db['Users']
+        lists = db['lists']
         message = ''
         fname = request.POST.get('fname')
         lname = request.POST.get('lname')
@@ -69,9 +73,11 @@ class SignUp(View):
         address = request.POST.get('address')
         userdata = {'fname': fname, 'lname': lname, 'email': email, 'password': password,
                     'address': address}
+        listobj = {'email': email, 'books': list()}
         user = users.find_one({'email': email})
         if user is None:
             users.insert_one(userdata)
+            lists.save(listobj)
             message = "Successfully registered"
         else:
             message = "User already exists"
@@ -160,3 +166,20 @@ class addTolist(View):
                 lists.update_one({"email": email}, {"$set": {"books": templist}})
                 return JsonResponse({"status": "Book was added"})
         return JsonResponse({"status": "Book already present"})
+
+
+class removeFromList(View):
+    def get(self, request, email, id):
+        books = db['books']
+        lists = db['lists']
+        bookdata = books.find_one({"_id": id})
+        listdata = lists.find_one({"email": email})
+        if bookdata is None or listdata is None:
+            return JsonResponse({"Status": "Book was not removed"})
+        else:
+            if id in listdata['books']:
+                templist = listdata['books']
+                templist.remove(id)
+                lists.update_one({"email": email}, {"$set": {"books": templist}})
+                return JsonResponse({"status": "Book was removed"})
+        return JsonResponse({"status": "Book was not present in the list"})
