@@ -183,3 +183,12 @@ class removeFromList(View):
                 lists.update_one({"email": email}, {"$set": {"books": templist}})
                 return JsonResponse({"status": "Book was removed"})
         return JsonResponse({"status": "Book was not present in the list"})
+
+
+class getAuthor(View):
+    def get(self, request, id):
+        authors = db['authors']
+        au = authors.find_one({"_id": id})
+        if au is None:
+            return JsonResponse({"status": "Not found"})
+        return JsonResponse({"name": au['Name']})

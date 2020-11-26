@@ -11,7 +11,6 @@
               <p class="lead">
                 Add books to your list for easy access. Browse books in catalogue and save them to your list. You can edit the list any time you want.
               </p>
-              <a href="javascript:;" class="btn btn-primary mt-5">Add books</a>
             </div>
             <div class="col-md-12 col-md-6">
               <div class="testimonial-glide glide--ltr glide--carousel glide--swipeable" id = "thisglide">
@@ -31,7 +30,24 @@
       </div>
     </div>
     <div class = "section">
+        <div class="text-center mb-4" id = "catext">
+            <h1>Catalogue</h1>
+        </div>
+        <div class = "justify-content-center">
+            <div class = "row justify-content-center">
+                <div class = "col-md-8">
+                    <ul id = "cataloguelist" style = "list-style-type: none">
 
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class = 'row justify-content-center'>
+            <div class="btn-wrapper">
+                <div class = "btn btn-gradient-white text-dark" onclick = nextButton(-1)>Prev</div>
+                <div class = "btn btn-gradient-white text-dark" onclick = nextButton(1)>Next</div>
+            </div>
+        </div>
     </div>
 {% endblock %}
 {% block scriptblock %}
@@ -40,6 +56,7 @@
     let url = location.origin + "/getlist/"+ objid;
     let url2 = location.origin + "/getCatalogue/";
     let data;
+    let dataArr;
     let glider;
     fetch(url)
     .then(function(response) {
@@ -77,7 +94,8 @@
         .then(function(myJson) {
             data = myJson;
             glider.destroy();
-            removeChild();
+            let elem = document.getElementById('mylist');
+            removeChild(elem);
             loadList2();
             if(data.length > 0) {
                 glider = new Glide('#thisglide', {
@@ -102,10 +120,10 @@
             liitem.style.marginRight = "5px";
             {#card div#}
             let carddiv = document.createElement('div');
-            carddiv.classList.add("card", "px-3", "py-2")
+            carddiv.classList.add("card", "px-3", "py-2", "pb-3")
             {# div row #}
             let divr1 = document.createElement('div')
-            divr1.classList.add('row', "mt--2")
+            divr1.classList.add('row', "mt--4")
             {# col-md-6#}
             let col1 = document.createElement('div')
             col1.classList.add('col-md-4')
@@ -183,12 +201,95 @@
         })
     }
 
-    let removeChild = function(){
-        let elem = document.getElementById("mylist")
+    let removeChild = function(elem){
         while(elem.firstChild){
             elem.removeChild(elem.firstChild);
         }
     }
 
+    let pageind = 1;
+    let loadCatalogue = function(dataArray, pageind, no){
+        let startind;
+        let endind;
+        if(dataArray.length < no){
+            startind = 0;
+            endind = dataArray.length - 1;
+        }
+        else{
+                startind = (pageind-1)*no;
+                endind = (pageind*no)-1;
+        }
+        console.log(startind, endind);
+        for(let i=startind; i<=endind; i++){
+            let liitem = document.createElement('li');
+            let cardiv = document.createElement('div');
+            cardiv.classList.add("card");
+            cardiv.style.marginBottom = "15px";
+            {#cardiv.style.height = "250px";#}
+            let div1 = document.createElement('div');
+            div1.classList.add("row", "p-4");
+            let divcol1 = document.createElement('div');
+            divcol1.classList.add("col-md-2");
+            let img = document.createElement('img');
+            img.src = dataArray[i]['cover']['medium'];
+            img.classList.add("img-fluid", "rounded" ,"shadow");
+            img.style.height = "100px";
+            divcol1.appendChild(img);
+            let divcol2 = document.createElement('div');
+            divcol2.classList.add("col");
+            let authText = "Authors: "
+            for(let m of dataArray[i]['authors']){
+                let aurl = location.origin + "/getAuthorName/" + m;
+                fetch(aurl)
+                .then(function(response){
+                    return response.json();
+                })
+                .then(function(data){
+                    authText += data["name"] + " ";
+                    divcol2.innerHTML = "<h2>" + dataArray[i]["title"] + "</h2><h5>" + authText + "</h5>";
+                })
+            }
+            div1.appendChild(divcol1);
+            div1.appendChild(divcol2);
+            cardiv.appendChild(div1)
+            liitem.appendChild(cardiv);
+            liitem.onclick = function(){redirectToBook(dataArray[i]["_id"])}
+            let ul = document.getElementById("cataloguelist");
+            ul.appendChild(liitem);
+        }
+    }
+    fetch(url2)
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data){
+            dataArr = data;
+            console.log(data[1]);
+            loadCatalogue(dataArr, 1, 10);
+        })
+
+    let updateCatalog = function(pageindex){
+        let ul = document.getElementById('cataloguelist');
+        removeChild(ul);
+        console.log(ul);
+        loadCatalogue(dataArr, pageindex, 10);
+    }
+
+    let nextButton = function(elem){
+        pageind += elem;
+        if(pageind < 1)
+            pageind = 1;
+        updateCatalog(pageind);
+        let ul = document.getElementById('catext');
+        ul.scrollIntoView();
+    }
+    let redirectToBook = function(id){
+        let url1 = location.origin + "/getbook/" + id + "/{{ email|safe }}";
+        window.location = url1;
+    }
+    let scrollto = function(){
+        let elem = document.getElementById('catext');
+        elem.scrollIntoView();
+    }
     </script>
 {% endblock %}
