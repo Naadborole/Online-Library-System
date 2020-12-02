@@ -57,6 +57,38 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Get Gold Membership</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            <div class="modal-body">
+                <div class ='form-group'>
+                    <div class="custom-control custom-radio mb-3">
+                        <input name="custom-radio-1" class="custom-control-input" id="customRadio1" type="radio">
+                        <label class="custom-control-label" for="customRadio1">3 Months</label>
+                    </div>
+                    <div class="custom-control custom-radio mb-3">
+                        <input name="custom-radio-1" class="custom-control-input" id="customRadio2" checked="" type="radio">
+                        <label class="custom-control-label" for="customRadio2">6 Months</label>
+                    </div>
+                    <div class="custom-control custom-radio mb-3">
+                        <input name="custom-radio-1" class="custom-control-input" id="customRadio3" checked="" type="radio">
+                        <label class="custom-control-label" for="customRadio2">12 Months</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="membershipAdd()">Apply</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 {% block scriptblock %}
     <script>
@@ -66,6 +98,16 @@
     let data;
     let dataArr;
     let glider;
+    let memtype = "{{ mem.type|safe }}";
+    if(memtype === "Free"){
+        let elem = document.getElementById("membership");
+        elem.setAttribute("data-toggle", "modal");
+        elem.setAttribute("data-target", "#exampleModal");
+    }
+    else{
+        let elem = document.getElementById("cert");
+        elem.style.color = 'yellow';
+    }
     fetch(url)
     .then(function(response) {
         return response.json();
@@ -83,14 +125,6 @@
             }).mount();
         }
     });
-
-    {#fetch(url2)#}
-    {#.then(function(response){#}
-    {#    return response.json#}
-    {# })#}
-    {#.then(function(data){#}
-    {#    #}
-    {# })#}
 
     let updateList = function(){
         let objid = "{{ id|safe }}";
@@ -332,5 +366,31 @@
     }
     let btn = document.getElementById("profilebtn");
         btn.onclick = function(){redirectToProfile();}
+
+    let membershipAdd = function(){
+        let butArr = ["customRadio1", 'customRadio2', 'customRadio3'];
+        let sel;
+        let i;
+        let count = 1;
+        for (i=0; i<butArr.length; i++){
+            if(document.getElementById(butArr[i]).checked) {
+                sel = count;
+                break;
+            }
+            count ++;
+        }
+        let time = 3;
+        if(sel > 1) {
+            time = (sel - 1) * 6;
+        }
+        let url1 = location.origin + "/addMembership/{{ email|safe }}/Gold/" + time;
+        fetch(url1)
+        .then(function (response){
+            return response.json();
+        })
+        .then(function (data){
+            alert(data['status'])
+        })
+    }
     </script>
 {% endblock %}

@@ -53,7 +53,7 @@
                         <p class ='font-weight-bold'>Validity </p>
                     </div>
                     <div class ='col-md-6'>
-                        <p class = 'font-weight-bold'>{{ mem.validity }}</p>
+                        <p class = 'font-weight-bold'>{{ mem.validity }} Months</p>
                     </div>
                 </div>
                 <div class ='row justify-content-center'>
@@ -61,7 +61,7 @@
                         <p class ='font-weight-bold'>Days Remaining </p>
                     </div>
                     <div class ='col-md-6'>
-                        <p class = 'font-weight-bold'>{{ mem.remaining }}</p>
+                        <p class = 'font-weight-bold'>{{ mem.remaining }} Days</p>
                     </div>
                 </div>
             </div>
@@ -84,25 +84,6 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            <div class="modal-body">
-                ...
-            </div>
-            <div class="modal-footer">
-               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
 {% block scriptblock %}
@@ -113,6 +94,11 @@
         act.style.visibility = 'hidden';
         let exp = document.getElementById('exp');
         exp.style.visibility = 'hidden';
+        let memtype = "{{ mem.type|safe }}";
+        if(memtype === "Gold"){
+            let elem = document.getElementById("cert");
+            elem.style.color = 'yellow';
+        }
 
         fetch(url1)
         .then(function(response){

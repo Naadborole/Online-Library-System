@@ -43,6 +43,10 @@ class mainPage(View):
             dat = data['datetime'].split("T")[0]
             today = datetime.strptime(dat, "%Y-%m-%d")
             bl = borrowed.find_one({'email': email})
+            if bl is None:
+                objdict = {"email": email, "books": list()}
+                borrowed.insert_one(objdict)
+                bl = borrowed.find_one({'email': email})
             bl = bl['books']
             temp = list()
             for i in bl:
@@ -296,7 +300,7 @@ class addMembership(View):
         self.updateMembership()
         membership = db['membership']
         mem = membership.find_one({"email": email})
-        if mem is not None and mem['type'] != "Free" and mem['active']:
+        if mem is not None and mem['type'] != "Free":
             return JsonResponse({"status": "A membership is already active"})
         with urllib.request.urlopen("http://worldtimeapi.org/api/timezone/Asia/Kolkata") as url:
             data = json.loads(url.read().decode())
@@ -310,6 +314,7 @@ class addMembership(View):
                 membership.replace_one({"email": email}, memdict)
             elif mem is None:
                 membership.insert_one(memdict)
+        return JsonResponse({"status": "Success!"})
 
     @staticmethod
     def updateMembership():
@@ -320,14 +325,13 @@ class addMembership(View):
             dat1 = datetime.strptime(dat, "%Y-%m-%d")
             memlist = membership.find({"type": "Gold"})
             for i in memlist:
-                time = i['time']
+                time = i['validity']
                 dat2 = i['date']
                 dat2 = datetime.strptime(dat2, "%Y-%m-%d")
                 if abs((dat1 - dat2).days) < (time * 30):
-                    upd = abs((dat1 - dat2).days)
+                    upd = (time*30) -abs((dat1 - dat2).days)
                     membership.update({"email": i['email']}, {"$set": {"remaining": upd}})
                 else:
-                    upd = 0
                     membership.replace_one({"email": i['email']}, {"email": i['email'], 'type': "Free", 'date': dat,
                                                                    'validity': 'infinite', 'remaining': 'unlimited'})
 
@@ -336,7 +340,8 @@ class addMembership(View):
         addMembership.updateMembership()
         membership = db['membership']
         mem = membership.find_one({"email": email})
-        if mem is not None and mem['type'] != "Free" and mem['active']:
+        print(mem)
+        if mem is not None and mem['type'] != "Free":
             return JsonResponse({"status": "A membership is already active"})
         with urllib.request.urlopen("http://worldtimeapi.org/api/timezone/Asia/Kolkata") as url:
             data = json.loads(url.read().decode())

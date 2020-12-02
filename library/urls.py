@@ -16,5 +16,6 @@ urlpatterns = [
     path('getAuthorName/<str:id>', views.getAuthor.as_view(), name='getAuthor'),
     path('borrow/<str:id>/<str:email>', views.borrow.as_view(), name='borrow'),
     path('userprofile/<str:id>/', views.getUserProfile.as_view(), name='userprofile'),
-    path('getBorrowList/<str:email>/', views.getBorrowedBooks, name='borrowed books')
+    path('getBorrowList/<str:email>/', views.getBorrowedBooks, name='borrowed books'),
+    path('addMembership/<str:email>/<str:type1>/<int:time>', views.addMembership.as_view(), name='addMember')
 ]
