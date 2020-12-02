@@ -30,8 +30,16 @@
       </div>
     </div>
     <div class = "section">
-        <div class="text-center mb-4" id = "catext">
+        <div class="text-center mb-4 " id = "catext">
             <h1>Catalogue</h1>
+        </div>
+        <div class="row justify-content-center">
+            <div class = "col-md-4 mr--4 mb-3">
+                <input class = "form-control" type = 'text' placeholder = "Search" id = "search">
+            </div>
+            <div class = "col-md-1">
+                <div class = "btn btn-gradient-primary" onclick = search()><i class ='fa fa-search' id="srchbtn"></i></div>
+            </div>
         </div>
         <div class = "justify-content-center">
             <div class = "row justify-content-center">
@@ -264,14 +272,12 @@
         })
         .then(function(data){
             dataArr = data;
-            console.log(data[1]);
             loadCatalogue(dataArr, 1, 10);
         })
 
     let updateCatalog = function(pageindex){
         let ul = document.getElementById('cataloguelist');
         removeChild(ul);
-        console.log(ul);
         loadCatalogue(dataArr, pageindex, 10);
     }
 
@@ -291,5 +297,40 @@
         let elem = document.getElementById('catext');
         elem.scrollIntoView();
     }
+
+    let search = function(){
+        let srt = document.getElementById('search')
+        if(srt.value === ""){
+            fetch(url2)
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data){
+                dataArr = data;
+                loadCatalogue(dataArr, 1, 10);
+                updateCatalog(1);
+            })
+        }
+        else{
+            let st = srt.value;
+            let srchurl = location.origin + "/search/" + st + "/";
+            fetch(srchurl)
+            .then(function(response){
+                return response.json();
+            })
+            .then(function(data){
+                let ul = document.getElementById('cataloguelist');
+                removeChild(ul);
+                dataArr = data;
+                loadCatalogue(data, 1, 10);
+            })
+        }
+     }
+    let redirectToProfile = function(){
+        let url = location.origin + "/userprofile/"+ objid;
+        window.location = url;
+    }
+    let btn = document.getElementById("profilebtn");
+        btn.onclick = function(){redirectToProfile();}
     </script>
 {% endblock %}

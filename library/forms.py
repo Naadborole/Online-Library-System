@@ -12,3 +12,4 @@ class SignUpForm(forms.Form):
     email = forms.CharField(widget=forms.EmailField(), label='Email')
     Address = forms.CharField(widget=forms.Textarea(), label='Address')
     password = forms.CharField(widget=forms.PasswordInput(), label="Password")
+
